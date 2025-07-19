@@ -1,4 +1,4 @@
-# EHRS - A Streamlined Healthcare Management System
+# EHRS - A Streamlined Hospital Management System
 
 ## Project Summary
 
