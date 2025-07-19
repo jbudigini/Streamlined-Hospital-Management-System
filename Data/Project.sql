@@ -1,15 +1,5 @@
--- Project Title: Streamlined Healthcare Management System (SHMS)
--- Team Name: Group 4
--- Group members:
--- 		Shaun Figueiro (sfiguei@iu.edu) (Team Lead)
--- 		Jayanth Budigini (jbudigin@iu.edu)
--- 		Syam Mungi (smungi@iu.edu)
-
-
-
 -- Data Base Creation
-
--- CREATE DATABASE "PatientData"					-- jbudigin
+-- CREATE DATABASE "PatientData"					
 --     WITH
 --     OWNER = postgres
 --     ENCODING = 'UTF8'
@@ -22,7 +12,7 @@
 
 -- Rawdata / Master Table 
 
-CREATE TABLE PatientRecords (					-- jbudigin
+CREATE TABLE PatientRecords (					
     Record_ID INT PRIMARY KEY,
     Patient_First_Name VARCHAR(25),
     Patient_Last_Name VARCHAR(25),
@@ -49,12 +39,13 @@ CREATE TABLE PatientRecords (					-- jbudigin
 );
 
 
-copy PatientRecords FROM '/healthcare_data.csv' WITH (FORMAT CSV, HEADER);		-- smungi
+
+-- copy dataset to PatientRecords FROM 'healthcare_data.csv' 		
 
 
 -- Normalized schema creation
 
-CREATE TABLE Patients (							-- smungi
+CREATE TABLE Patients (
     Patient_ID SERIAL PRIMARY KEY,
     Patient_First_Name VARCHAR(25) NOT NULL,
     Patient_Last_Name VARCHAR(25) NOT NULL,
@@ -69,14 +60,14 @@ CREATE TABLE Patients (							-- smungi
 );
 
 
-CREATE TABLE Doctors (							-- smungi
+CREATE TABLE Doctors (							
     Doctor_ID SERIAL PRIMARY KEY,
     Doctor_Name VARCHAR(50) NOT NULL Unique,
     Doctor_Specialty VARCHAR(50) NOT NULL,
     Doctor_Department VARCHAR(25) NOT NULL
 );
 
-CREATE TABLE Visits (							-- jbudigin
+CREATE TABLE Visits (							
     Visit_ID SERIAL PRIMARY KEY,
     Patient_ID INT,
     Record_ID SERIAL,     --- change
@@ -99,7 +90,7 @@ CREATE TABLE Visits (							-- jbudigin
 
 -- Data insertion
 
-INSERT INTO Patients (Patient_First_Name, Patient_Last_Name, Age, Gender, Height, Weight, Allergies, Address, Insurance_Provider)		-- sfiguei
+INSERT INTO Patients ( Patient_First_Name, Patient_Last_Name, Age, Gender, Height, Weight, Allergies, Address, Insurance_Provider)
 SELECT DISTINCT
     Patient_First_Name,
     Patient_Last_Name,
@@ -110,12 +101,13 @@ SELECT DISTINCT
     Allergies,
     Address,
     Insurance_Provider
+FROM PatientRecords
+ON CONFLICT (patient_first_name, patient_last_name) DO NOTHING;
 
-FROM PatientRecords;
 
 
 
-INSERT INTO Doctors (Doctor_Name, Doctor_Specialty, Doctor_Department)				-- sfiguei
+INSERT INTO Doctors (Doctor_Name, Doctor_Specialty, Doctor_Department)				
 SELECT DISTINCT
     Doctor_Name,
     Doctor_Specialty,
@@ -124,7 +116,7 @@ FROM PatientRecords;
 
 
 
--- sfiguei
+
 INSERT INTO Visits (Patient_ID, Record_ID, Admission_Type, Visit_Date, Room_Number, Doctor_ID, Symptoms, Tests, Diagnosis_Notes, Prescription, Payment_Amount, Payment_Method, Payment_Invoice_Number)
 SELECT
     p.Patient_ID,
@@ -155,25 +147,25 @@ select * from visits;
 
 
 -- Patients along with their visit count.
-SELECT p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name, p.Age, p.Gender, COUNT(v.Visit_ID) AS Visit_Count	-- sfiguei
+SELECT p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name, p.Age, p.Gender, COUNT(v.Visit_ID) AS Visit_Count	
 FROM Patients p LEFT JOIN Visits v ON p.Patient_ID = v.Patient_ID
 GROUP BY p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name, p.Age, p.Gender
 Order By Visit_Count DESC;
 
 -- Patients along with their total payment value.
-SELECT p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name, SUM(v.Payment_Amount) AS Total_Payment, COUNT(v.Visit_ID) AS Visit_Count	-- jbudigin
+SELECT p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name, SUM(v.Payment_Amount) AS Total_Payment, COUNT(v.Visit_ID) AS Visit_Count	
 FROM Patients p INNER JOIN Visits v ON p.Patient_ID = v.Patient_ID
 GROUP BY p.Patient_ID, p.Patient_First_Name, p.Patient_Last_Name
 HAVING SUM(v.Payment_Amount) > 500;
 
 -- Doctors along with their total billing amount.
-SELECT d.Doctor_ID, d.Doctor_Name, SUM(v.Payment_Amount) AS Total_Billing_Amount	-- smungi
+SELECT d.Doctor_ID, d.Doctor_Name, SUM(v.Payment_Amount) AS Total_Billing_Amount	
 FROM Doctors d INNER JOIN Visits v ON d.Doctor_ID = v.Doctor_ID
 GROUP BY d.Doctor_ID, d.Doctor_Name
 ORDER BY Total_Billing_Amount DESC;
 
 -- Highest billing department of hospital
-SELECT d.Doctor_Department, SUM(v.Payment_Amount) AS Total_Billing_Amount		--smungi
+SELECT d.Doctor_Department, SUM(v.Payment_Amount) AS Total_Billing_Amount		
 FROM Doctors d INNER JOIN Visits v ON d.Doctor_ID = v.Doctor_ID
 GROUP BY d.Doctor_Department
 ORDER BY Total_Billing_Amount DESC LIMIT 1;
