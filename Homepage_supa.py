@@ -39,22 +39,9 @@ def get_gradient_style(image_path, image_width, image_height):
     </style>
     """
 
-# def check_supabase_connection():
-#     try:
-#         response = supabase.table("patients").select("patient_id").limit(1).execute()
-#         if response.data is not None:
-#             st.success("✅ Connected to Supabase successfully.")x
-#         else:
-#             st.warning("⚠️ Supabase connected, but no data found.")
-#     except Exception as e:
-#         st.error(f"❌ Supabase connection failed: {e}")
-
 def show_homepage():
     st.set_page_config(page_title="Hospital Management System", page_icon="🩺")
     st.markdown(get_gradient_style(image_path, image_width, image_height), unsafe_allow_html=True)
-    # st.title(" Welcome to the Hospital Management System")
-    # check_supabase_connection()
-    # st.markdown("Use the sidebar to navigate through Patients, Visits, Invoices, and more.")
 
 if __name__ == "__main__":
     show_homepage()
