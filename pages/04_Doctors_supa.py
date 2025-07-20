@@ -11,6 +11,49 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def force_light_theme_style():
+    return """
+    <style>
+        html, body, [data-testid="stAppViewContainer"] {
+            background-color: #f0f4ff !important;
+            color: black !important;
+        }
+
+        [data-testid="stSidebar"] {
+            background: linear-gradient(to bottom, #e0e7ff, #d1e0fc) !important;
+            color: black !important;
+        }
+
+        /* Sidebar text including navigation labels */
+        [data-testid="stSidebar"] * {
+            color: black !important;
+        }
+
+        /* Input labels, help text, headers */
+        label, .css-1cpxqw2, .css-qrbaxs, .css-1v0mbdj, .css-1y4p8pa {
+            color: black !important;
+        }
+
+        
+        /* Input and button styling */
+        .stTextInput input,
+        .stSelectbox div,
+        .stTextArea textarea,
+        .stButton button {
+            color: black !important;
+            background-color: white !important;
+        }
+
+        .stDataFrame, .stTable, .stMarkdown, .stHeader, .stSubheader {
+            color: black !important;
+        }
+
+        /* Search input label specifically */
+        section input + div > label {
+            color: black !important;
+        }
+    </style>
+    """
 
 def get_gradient_style():
   """
@@ -30,6 +73,7 @@ def get_gradient_style():
 
 
 st.markdown(get_gradient_style(), unsafe_allow_html=True)
+st.markdown(force_light_theme_style(), unsafe_allow_html=True)
 
 
 def doctors_page():
